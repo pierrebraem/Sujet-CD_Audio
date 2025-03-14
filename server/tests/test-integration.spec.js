@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../server');
 const pool = require('../configs/db');
 
-describe('Test unitaire CD', () => {
+describe('Test integration back CD', () => {
     beforeAll(async () => {
         await pool.query(`CREATE TABLE IF NOT EXISTS cds (
             id SERIAL PRIMARY KEY,
