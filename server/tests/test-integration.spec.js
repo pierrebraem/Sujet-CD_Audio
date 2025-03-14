@@ -1,9 +1,22 @@
 const request = require('supertest');
 const app = require('../server');
 const pool = require('../configs/db');
+const { PostgreSqlContainer } = require('@testcontainers/postgresql');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+let container, databaseUrl;
+jest.setTimeout(30000);
 
 describe('Test integration back CD', () => {
     beforeAll(async () => {
+        container = await new PostgreSqlContainer()
+            .withDatabase('test')
+            .start()
+        databaseUrl = container.getConnectionUri();
+        process.env.DATABASE_URL = databaseUrl;
+
         await pool.query(`CREATE TABLE IF NOT EXISTS cds (
             id SERIAL PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
@@ -21,7 +34,10 @@ describe('Test integration back CD', () => {
     });
     
     afterAll(async () => {
-        await pool.end();
+        if(container){
+            await container.stop();
+            await pool.end();
+        }
     });
 
     test('Récupérer tous les cds', async () => {
